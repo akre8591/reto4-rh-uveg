@@ -221,7 +221,7 @@ h3 {
 /* ---------- Filters ---------- */
 .filters {
   display: grid;
-  grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(160px, 1fr));
+  grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(150px, 1fr));
   gap: 10px;
 }
 
@@ -723,6 +723,24 @@ textarea {
 .confirm__message {
   margin: 0 0 18px;
   color: var(--text-muted);
+}
+
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--warning-soft);
+  border: 1px solid #f5d68a;
+  color: #7c4a06;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+}
+
+.notice p {
+  margin: 0;
+  font-size: 0.9rem;
 }
 
 /* ---------- Misc ---------- */

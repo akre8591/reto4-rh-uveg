@@ -8,6 +8,8 @@ const PHONE_PATTERN = /^\d{10}$/
 const MIN_SALARY = 1
 const MAX_SALARY = 1_000_000
 const MIN_HIRE_AGE_YEARS = 18
+/** Raises above this percentage require an explicit confirmation from the user. */
+export const RAISE_CONFIRMATION_THRESHOLD = 20
 
 /** Validates the employee form. Returns an empty object when the data is valid. */
 export function validateEmployee(
@@ -180,6 +182,17 @@ export function validateRaise(
   }
 
   return errors
+}
+
+/** Percentage increase a raise represents over the current salary. */
+export function raiseIncreasePercent(currentSalary: number, newSalary: number): number {
+  if (!currentSalary || !Number.isFinite(newSalary)) return 0
+  return ((newSalary - currentSalary) / currentSalary) * 100
+}
+
+/** True when the raise exceeds the threshold and must be confirmed before applying. */
+export function requiresRaiseConfirmation(currentSalary: number, newSalary: number): boolean {
+  return raiseIncreasePercent(currentSalary, newSalary) > RAISE_CONFIRMATION_THRESHOLD
 }
 
 export function hasErrors(errors: object): boolean {

@@ -37,11 +37,13 @@ export interface Employee {
   contractType: 'tiempo_completo' | 'medio_tiempo' | 'temporal'
   salary: number
   status: EmployeeStatus
+  /** ISO timestamp of the archiving, or null while the record is active. */
+  archivedAt: string | null
   leaves: Leave[]
   raises: Raise[]
 }
 
-export type EmployeeInput = Omit<Employee, 'id' | 'leaves' | 'raises'>
+export type EmployeeInput = Omit<Employee, 'id' | 'leaves' | 'raises' | 'archivedAt'>
 
 export type LeaveInput = Omit<Leave, 'id' | 'createdAt'>
 

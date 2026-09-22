@@ -1,0 +1,97 @@
+[
+  {
+    "id": "01",
+    "caso": "Listado: filtros disponibles",
+    "res": "Capturado",
+    "det": "selects: [\"Todos los departamentos/Dirección General/Recursos Humanos/Finanzas/Ventas/Tecnologías de la Información/Operaciones/Mercadotecnia/Atención a Clientes\",\"Todos los estatus/Activo/Inactivo\",\"Solo expedientes activos/Solo expedientes archivados/Activos y archivados\",\"Ordenar por nombre/Ordenar por an"
+  },
+  {
+    "id": "01b",
+    "caso": "Encabezado del listado",
+    "res": "",
+    "det": "Colaboradores |  | 9 de 9 registros · 0 archivados"
+  },
+  {
+    "id": "02",
+    "caso": "R5 · Aumento de $24,500 a $27,000 (+10.2%)",
+    "res": "APLICADO DIRECTO",
+    "det": ""
+  },
+  {
+    "id": "03",
+    "caso": "R5 · Aumento exactamente del 20% ($24,500 → $29,400)",
+    "res": "APLICADO DIRECTO",
+    "det": ""
+  },
+  {
+    "id": "04",
+    "caso": "R5 · Aumento de $24,500 a $55,000 (+124%)",
+    "res": "PIDIÓ CONFIRMACIÓN",
+    "det": "Confirmar aumento superior al umbral | ✕ |  | El incremento de $24,500.00 a $55,000.00 representa un +124.49%, por encima del 20 % permitido sin confirmación. Verifica que la cantidad sea correcta antes de continuar. |  | Cancelar | Sí, aplicar el aumento"
+  },
+  {
+    "id": "05",
+    "caso": "R5 · Cancelar la confirmación",
+    "res": "SALARIO CAMBIÓ — falla",
+    "det": ""
+  },
+  {
+    "id": "06",
+    "caso": "R5 · Confirmar el aumento desproporcionado",
+    "res": "NO SE APLICÓ",
+    "det": ""
+  },
+  {
+    "id": "07",
+    "caso": "R4 · ¿Existe la acción Archivar?",
+    "res": "SÍ"
+  },
+  {
+    "id": "08",
+    "caso": "R4 · Mensaje de confirmación al archivar",
+    "res": "",
+    "det": "Archivar colaborador | ✕ |  | ¿Deseas archivar a Ana Lucía Ramírez Ponce? Dejará de aparecer en el listado activo, pero su expediente —permisos y aumentos incluidos— se conserva y podrá consultarse con el filtro de archivados. |  | Cancelar"
+  },
+  {
+    "id": "09",
+    "caso": "R4 · Tras archivar",
+    "res": "DESAPARECE DEL LISTADO ACTIVO",
+    "det": "antes: 9 de 9 registros | después: 8 de 9 registros | 1 archivados"
+  },
+  {
+    "id": "10",
+    "caso": "R4 · Filtro \"Solo archivados\"",
+    "res": "MUESTRA EL ARCHIVADO",
+    "det": "1 de 9 registros"
+  },
+  {
+    "id": "11",
+    "caso": "R4 · Expediente del colaborador archivado",
+    "res": "CONSERVA HISTORIAL",
+    "det": "[\"Permisos (1)\",\"Aumentos (1)\"]"
+  },
+  {
+    "id": "12",
+    "caso": "R4 · Reactivar y recargar",
+    "res": "REVISAR",
+    "det": "8 de 9 registros"
+  },
+  {
+    "id": "13",
+    "caso": "Migración · Datos guardados por la v1",
+    "res": "MIGRADOS CORRECTAMENTE",
+    "det": "claves en localStorage: [\"rh-uveg:employees:v1\",\"rh-uveg:employees:v2\"]"
+  },
+  {
+    "id": "14",
+    "caso": "Regresión · Validaciones de la v1 siguen activas",
+    "res": "SIN REGRESIONES",
+    "det": "Ya existe un empleado con ese número. / El nombre es obligatorio. / Los apellidos son obligatorios. / Ya existe un empleado con ese correo. / El teléfono es obligatorio. / La fecha de nacimiento es ob"
+  },
+  {
+    "id": "15",
+    "caso": "A2 · El panel excluye a los archivados",
+    "res": "SÍ (9 → 8)",
+    "det": "archivados"
+  }
+]

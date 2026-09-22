@@ -9,16 +9,26 @@ interface Props {
   employees: Employee[]
   onSelect: (employee: Employee) => void
   onEdit: (employee: Employee) => void
-  onDelete: (employee: Employee) => void
+  onArchive: (employee: Employee) => void
+  onRestore: (employee: Employee) => void
   onCreate: () => void
 }
 
 type SortKey = 'name' | 'hireDate' | 'salary' | 'department'
+type ArchiveView = 'activos' | 'archivados' | 'todos'
 
-export function EmployeeList({ employees, onSelect, onEdit, onDelete, onCreate }: Props) {
+export function EmployeeList({
+  employees,
+  onSelect,
+  onEdit,
+  onArchive,
+  onRestore,
+  onCreate,
+}: Props) {
   const [search, setSearch] = useState('')
   const [department, setDepartment] = useState('todos')
   const [status, setStatus] = useState('todos')
+  const [archiveView, setArchiveView] = useState<ArchiveView>('activos')
   const [sortKey, setSortKey] = useState<SortKey>('name')
 
   const visible = useMemo(() => {
@@ -32,7 +42,11 @@ export function EmployeeList({ employees, onSelect, onEdit, onDelete, onCreate }
         employee.email.toLowerCase().includes(term)
       const matchesDepartment = department === 'todos' || employee.department === department
       const matchesStatus = status === 'todos' || employee.status === status
-      return matchesTerm && matchesDepartment && matchesStatus
+      const isArchived = employee.archivedAt !== null
+      const matchesArchive =
+        archiveView === 'todos' ||
+        (archiveView === 'archivados' ? isArchived : !isArchived)
+      return matchesTerm && matchesDepartment && matchesStatus && matchesArchive
     })
 
     return filtered.sort((a, b) => {
@@ -47,7 +61,7 @@ export function EmployeeList({ employees, onSelect, onEdit, onDelete, onCreate }
           return fullName(a).localeCompare(fullName(b), 'es')
       }
     })
-  }, [employees, search, department, status, sortKey])
+  }, [employees, search, department, status, archiveView, sortKey])
 
   return (
     <section className="list">
@@ -55,7 +69,8 @@ export function EmployeeList({ employees, onSelect, onEdit, onDelete, onCreate }
         <div>
           <h2>Colaboradores</h2>
           <p className="section-header__meta">
-            {visible.length} de {employees.length} registros
+            {visible.length} de {employees.length} registros ·{' '}
+            {employees.filter((employee) => employee.archivedAt !== null).length} archivados
           </p>
         </div>
         <button type="button" className="button button--primary" onClick={onCreate}>
@@ -97,6 +112,15 @@ export function EmployeeList({ employees, onSelect, onEdit, onDelete, onCreate }
           ))}
         </select>
         <select
+          value={archiveView}
+          aria-label="Filtrar por archivado"
+          onChange={(event) => setArchiveView(event.target.value as ArchiveView)}
+        >
+          <option value="activos">Solo expedientes activos</option>
+          <option value="archivados">Solo expedientes archivados</option>
+          <option value="todos">Activos y archivados</option>
+        </select>
+        <select
           value={sortKey}
           aria-label="Ordenar listado"
           onChange={(event) => setSortKey(event.target.value as SortKey)}
@@ -111,7 +135,11 @@ export function EmployeeList({ employees, onSelect, onEdit, onDelete, onCreate }
       {visible.length === 0 ? (
         <EmptyState
           title="No se encontraron colaboradores"
-          message="Ajusta los filtros de búsqueda o registra un nuevo colaborador."
+          message={
+            archiveView === 'archivados'
+              ? 'No hay expedientes archivados con los filtros seleccionados.'
+              : 'Ajusta los filtros de búsqueda o registra un nuevo colaborador.'
+          }
         />
       ) : (
         <div className="table-wrapper">
@@ -153,9 +181,13 @@ export function EmployeeList({ employees, onSelect, onEdit, onDelete, onCreate }
                   <td onClick={() => onSelect(employee)}>{formatCurrency(employee.salary)}</td>
                   <td onClick={() => onSelect(employee)}>{employee.leaves.length}</td>
                   <td onClick={() => onSelect(employee)}>
-                    <Badge tone={employee.status === 'activo' ? 'success' : 'neutral'}>
-                      {STATUS_LABEL[employee.status]}
-                    </Badge>
+                    {employee.archivedAt ? (
+                      <Badge tone="warning">Archivado</Badge>
+                    ) : (
+                      <Badge tone={employee.status === 'activo' ? 'success' : 'neutral'}>
+                        {STATUS_LABEL[employee.status]}
+                      </Badge>
+                    )}
                   </td>
                   <td className="table__actions">
                     <button
@@ -172,13 +204,23 @@ export function EmployeeList({ employees, onSelect, onEdit, onDelete, onCreate }
                     >
                       Editar
                     </button>
-                    <button
-                      type="button"
-                      className="button button--tiny button--danger-ghost"
-                      onClick={() => onDelete(employee)}
-                    >
-                      Eliminar
-                    </button>
+                    {employee.archivedAt ? (
+                      <button
+                        type="button"
+                        className="button button--tiny"
+                        onClick={() => onRestore(employee)}
+                      >
+                        Reactivar
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="button button--tiny button--danger-ghost"
+                        onClick={() => onArchive(employee)}
+                      >
+                        Archivar
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

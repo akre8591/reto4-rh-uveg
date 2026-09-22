@@ -19,6 +19,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     contractType: 'tiempo_completo',
     salary: 68000,
     status: 'activo',
+    archivedAt: null,
     leaves: [
       {
         id: 'lv-001',
@@ -63,6 +64,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     contractType: 'tiempo_completo',
     salary: 42000,
     status: 'activo',
+    archivedAt: null,
     leaves: [
       {
         id: 'lv-002',
@@ -99,6 +101,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     contractType: 'tiempo_completo',
     salary: 24500,
     status: 'activo',
+    archivedAt: null,
     leaves: [
       {
         id: 'lv-003',
@@ -135,6 +138,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     contractType: 'tiempo_completo',
     salary: 32000,
     status: 'activo',
+    archivedAt: null,
     leaves: [],
     raises: [
       {
@@ -161,6 +165,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     contractType: 'tiempo_completo',
     salary: 27500,
     status: 'activo',
+    archivedAt: null,
     leaves: [
       {
         id: 'lv-004',
@@ -188,6 +193,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     contractType: 'medio_tiempo',
     salary: 15800,
     status: 'activo',
+    archivedAt: null,
     leaves: [],
     raises: [],
   },
@@ -205,6 +211,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     contractType: 'tiempo_completo',
     salary: 21000,
     status: 'activo',
+    archivedAt: null,
     leaves: [
       {
         id: 'lv-005',
@@ -232,6 +239,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     contractType: 'temporal',
     salary: 18400,
     status: 'inactivo',
+    archivedAt: null,
     leaves: [
       {
         id: 'lv-006',
@@ -259,6 +267,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     contractType: 'tiempo_completo',
     salary: 19500,
     status: 'activo',
+    archivedAt: null,
     leaves: [],
     raises: [],
   },

@@ -2,8 +2,15 @@ import { useState } from 'react'
 import type { Employee, RaiseInput } from '../types'
 import { formatCurrency, formatPercent } from '../lib/format'
 import { todayISO } from '../lib/dates'
-import { hasErrors, validateRaise, type Errors } from '../lib/validation'
-import { Field, Modal } from './ui'
+import {
+  RAISE_CONFIRMATION_THRESHOLD,
+  hasErrors,
+  raiseIncreasePercent,
+  requiresRaiseConfirmation,
+  validateRaise,
+  type Errors,
+} from '../lib/validation'
+import { ConfirmDialog, Field, Modal } from './ui'
 
 interface Props {
   employee: Employee
@@ -18,6 +25,8 @@ export function RaiseForm({ employee, onSubmit, onClose }: Props) {
     reason: '',
   })
   const [errors, setErrors] = useState<Errors<RaiseInput>>({})
+  // Raise waiting for an explicit confirmation because it exceeds the threshold.
+  const [pendingRaise, setPendingRaise] = useState<RaiseInput | null>(null)
 
   const update = <K extends keyof RaiseInput>(key: K, value: RaiseInput[K]) => {
     setForm((current) => ({ ...current, [key]: value }))
@@ -25,14 +34,41 @@ export function RaiseForm({ employee, onSubmit, onClose }: Props) {
   }
 
   const increase = form.newSalary > employee.salary ? form.newSalary - employee.salary : 0
-  const percent = increase > 0 ? (increase / employee.salary) * 100 : 0
+  const percent = increase > 0 ? raiseIncreasePercent(employee.salary, form.newSalary) : 0
+  const needsConfirmation = requiresRaiseConfirmation(employee.salary, form.newSalary)
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
     const nextErrors = validateRaise(form, employee)
     setErrors(nextErrors)
     if (hasErrors(nextErrors)) return
-    onSubmit({ ...form, reason: form.reason.trim() })
+    const raise = { ...form, reason: form.reason.trim() }
+    // Increases above the threshold are usually typing errors: ask before applying.
+    if (requiresRaiseConfirmation(employee.salary, raise.newSalary)) {
+      setPendingRaise(raise)
+      return
+    }
+    onSubmit(raise)
+  }
+
+  if (pendingRaise) {
+    return (
+      <ConfirmDialog
+        title="Confirmar aumento superior al umbral"
+        confirmLabel="Sí, aplicar el aumento"
+        message={`El incremento de ${formatCurrency(employee.salary)} a ${formatCurrency(
+          pendingRaise.newSalary,
+        )} representa un ${formatPercent(
+          raiseIncreasePercent(employee.salary, pendingRaise.newSalary),
+        )}, por encima del ${RAISE_CONFIRMATION_THRESHOLD} % permitido sin confirmación. Verifica que la cantidad sea correcta antes de continuar.`}
+        onCancel={() => setPendingRaise(null)}
+        onConfirm={() => {
+          const confirmed = pendingRaise
+          setPendingRaise(null)
+          onSubmit(confirmed)
+        }}
+      />
+    )
   }
 
   return (
@@ -66,7 +102,11 @@ export function RaiseForm({ employee, onSubmit, onClose }: Props) {
             error={errors.newSalary}
             hint={
               increase > 0
-                ? `Incremento de ${formatCurrency(increase)} (${formatPercent(percent)}).`
+                ? `Incremento de ${formatCurrency(increase)} (${formatPercent(percent)}).${
+                    needsConfirmation
+                      ? ` Supera el ${RAISE_CONFIRMATION_THRESHOLD} %: se pedirá confirmación.`
+                      : ''
+                  }`
                 : 'Debe ser mayor al salario vigente.'
             }
           >

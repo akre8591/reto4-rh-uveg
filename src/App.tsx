@@ -11,14 +11,15 @@ import { ConfirmDialog } from './components/ui'
 import { fullName } from './lib/format'
 
 type View = 'panel' | 'empleados' | 'detalle'
-type Dialog = 'empleado' | 'permiso' | 'aumento' | 'eliminar' | 'reiniciar' | null
+type Dialog = 'empleado' | 'permiso' | 'aumento' | 'archivar' | 'reiniciar' | null
 
 export default function App() {
   const {
     employees,
     addEmployee,
     updateEmployee,
-    removeEmployee,
+    archiveEmployee,
+    restoreEmployee,
     addLeave,
     updateLeaveStatus,
     removeLeave,
@@ -116,9 +117,13 @@ export default function App() {
               setEditingId(employee.id)
               setDialog('empleado')
             }}
-            onDelete={(employee) => {
+            onArchive={(employee) => {
               setSelectedId(employee.id)
-              setDialog('eliminar')
+              setDialog('archivar')
+            }}
+            onRestore={(employee) => {
+              restoreEmployee(employee.id)
+              setToast('Colaborador reactivado. Vuelve a aparecer en el listado activo.')
             }}
           />
         ) : null}
@@ -130,6 +135,11 @@ export default function App() {
             onEdit={() => {
               setEditingId(selected.id)
               setDialog('empleado')
+            }}
+            onArchive={() => setDialog('archivar')}
+            onRestore={() => {
+              restoreEmployee(selected.id)
+              setToast('Colaborador reactivado. Vuelve a aparecer en el listado activo.')
             }}
             onAddLeave={() => setDialog('permiso')}
             onAddRaise={() => setDialog('aumento')}
@@ -188,17 +198,17 @@ export default function App() {
         />
       ) : null}
 
-      {dialog === 'eliminar' && selected ? (
+      {dialog === 'archivar' && selected ? (
         <ConfirmDialog
-          title="Eliminar colaborador"
-          message={`¿Deseas eliminar a ${fullName(selected)}? Se borrarán también sus permisos y aumentos registrados.`}
+          title="Archivar colaborador"
+          confirmLabel="Archivar"
+          message={`¿Deseas archivar a ${fullName(selected)}? Dejará de aparecer en el listado activo, pero su expediente —permisos y aumentos incluidos— se conserva y podrá consultarse con el filtro de archivados.`}
           onCancel={() => setDialog(null)}
           onConfirm={() => {
-            removeEmployee(selected.id)
-            setSelectedId(null)
+            archiveEmployee(selected.id)
             setDialog(null)
             setView('empleados')
-            setToast('Colaborador eliminado.')
+            setToast('Colaborador archivado. Su expediente se conserva completo.')
           }}
         />
       ) : null}

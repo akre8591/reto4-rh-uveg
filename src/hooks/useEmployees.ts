@@ -20,7 +20,13 @@ export function useEmployees() {
   }, [employees])
 
   const addEmployee = useCallback((input: EmployeeInput): Employee => {
-    const employee: Employee = { ...input, id: createId('emp'), leaves: [], raises: [] }
+    const employee: Employee = {
+      ...input,
+      id: createId('emp'),
+      archivedAt: null,
+      leaves: [],
+      raises: [],
+    }
     setEmployees((current) => [...current, employee])
     return employee
   }, [])
@@ -31,8 +37,27 @@ export function useEmployees() {
     )
   }, [])
 
-  const removeEmployee = useCallback((id: string) => {
-    setEmployees((current) => current.filter((employee) => employee.id !== id))
+  /**
+   * Archives a colleague: the record leaves the active roster but keeps its whole file
+   * (leaves and raises included). Nothing is deleted from storage, and the employment
+   * status is left untouched so it still reflects the situation at the time of the leave.
+   */
+  const archiveEmployee = useCallback((id: string) => {
+    setEmployees((current) =>
+      current.map((employee) =>
+        employee.id === id
+          ? { ...employee, archivedAt: new Date().toISOString() }
+          : employee,
+      ),
+    )
+  }, [])
+
+  const restoreEmployee = useCallback((id: string) => {
+    setEmployees((current) =>
+      current.map((employee) =>
+        employee.id === id ? { ...employee, archivedAt: null } : employee,
+      ),
+    )
   }, [])
 
   const addLeave = useCallback((employeeId: string, input: LeaveInput) => {
@@ -101,7 +126,8 @@ export function useEmployees() {
     employees,
     addEmployee,
     updateEmployee,
-    removeEmployee,
+    archiveEmployee,
+    restoreEmployee,
     addLeave,
     updateLeaveStatus,
     removeLeave,

@@ -9,17 +9,20 @@ export function Dashboard({ employees }: { employees: Employee[] }) {
   const today = todayISO()
 
   const stats = useMemo(() => {
-    const active = employees.filter((employee) => employee.status === 'activo')
+    // Archived files stay out of the indicators; they are consulted from the roster filter.
+    const current = employees.filter((employee) => employee.archivedAt === null)
+    const archivedCount = employees.length - current.length
+    const active = current.filter((employee) => employee.status === 'activo')
     const payroll = active.reduce((total, employee) => total + employee.salary, 0)
     const averageSeniority =
-      employees.length > 0
-        ? employees.reduce(
+      current.length > 0
+        ? current.reduce(
             (total, employee) => total + calculateSeniority(employee.hireDate).totalDays,
             0,
-          ) / employees.length
+          ) / current.length
         : 0
 
-    const allLeaves = employees.flatMap((employee) =>
+    const allLeaves = current.flatMap((employee) =>
       employee.leaves.map((leave) => ({ leave, employee })),
     )
     const currentLeaves = allLeaves.filter(
@@ -29,14 +32,15 @@ export function Dashboard({ employees }: { employees: Employee[] }) {
     const pendingLeaves = allLeaves.filter(({ leave }) => leave.status === 'pendiente')
 
     const byDepartment = new Map<string, number>()
-    for (const employee of employees) {
+    for (const employee of current) {
       byDepartment.set(employee.department, (byDepartment.get(employee.department) ?? 0) + 1)
     }
 
-    const longestTenure = [...employees].sort((a, b) => a.hireDate.localeCompare(b.hireDate))
+    const longestTenure = [...current].sort((a, b) => a.hireDate.localeCompare(b.hireDate))
 
     return {
-      total: employees.length,
+      total: current.length,
+      archivedCount,
       active: active.length,
       payroll,
       averageSeniorityYears: averageSeniority / 365.25,
@@ -62,7 +66,9 @@ export function Dashboard({ employees }: { employees: Employee[] }) {
         <article className="stat-card">
           <p className="stat-card__label">Colaboradores</p>
           <p className="stat-card__value">{stats.total}</p>
-          <p className="stat-card__meta">{stats.active} activos</p>
+          <p className="stat-card__meta">
+            {stats.active} activos · {stats.archivedCount} archivados
+          </p>
         </article>
         <article className="stat-card">
           <p className="stat-card__label">Nómina mensual activa</p>

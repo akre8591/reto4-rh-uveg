@@ -14,6 +14,8 @@ interface Props {
   employee: Employee
   onBack: () => void
   onEdit: () => void
+  onArchive: () => void
+  onRestore: () => void
   onAddLeave: () => void
   onAddRaise: () => void
   onChangeLeaveStatus: (leaveId: string, status: LeaveStatus) => void
@@ -30,6 +32,8 @@ export function EmployeeDetail({
   employee,
   onBack,
   onEdit,
+  onArchive,
+  onRestore,
   onAddLeave,
   onAddRaise,
   onChangeLeaveStatus,
@@ -66,6 +70,18 @@ export function EmployeeDetail({
         ← Volver al listado
       </button>
 
+      {employee.archivedAt ? (
+        <div className="notice" role="status">
+          <p>
+            Expediente archivado el {formatShortDate(employee.archivedAt.slice(0, 10))}. La
+            información se conserva completa y puede consultarse en cualquier momento.
+          </p>
+          <button type="button" className="button button--tiny" onClick={onRestore}>
+            Reactivar colaborador
+          </button>
+        </div>
+      ) : null}
+
       <header className="detail__header">
         <div className="detail__identity">
           <div className="avatar avatar--lg" aria-hidden="true">
@@ -77,9 +93,13 @@ export function EmployeeDetail({
               {employee.position} · {employee.department}
             </p>
             <div className="detail__badges">
-              <Badge tone={employee.status === 'activo' ? 'success' : 'neutral'}>
-                {STATUS_LABEL[employee.status]}
-              </Badge>
+              {employee.archivedAt ? (
+                <Badge tone="warning">Archivado</Badge>
+              ) : (
+                <Badge tone={employee.status === 'activo' ? 'success' : 'neutral'}>
+                  {STATUS_LABEL[employee.status]}
+                </Badge>
+              )}
               <Badge tone="info">{CONTRACT_LABEL[employee.contractType]}</Badge>
               <Badge tone="neutral">{employee.employeeNumber}</Badge>
             </div>
@@ -89,6 +109,11 @@ export function EmployeeDetail({
           <button type="button" className="button button--ghost" onClick={onEdit}>
             Editar datos
           </button>
+          {employee.archivedAt ? null : (
+            <button type="button" className="button button--ghost" onClick={onArchive}>
+              Archivar
+            </button>
+          )}
           <button type="button" className="button button--secondary" onClick={onAddLeave}>
             Nuevo permiso
           </button>
