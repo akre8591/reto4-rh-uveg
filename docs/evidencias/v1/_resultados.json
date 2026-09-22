@@ -1,0 +1,105 @@
+[
+  {
+    "id": "01",
+    "caso": "Panel general (vista inicial)",
+    "resultado": "Capturado"
+  },
+  {
+    "id": "02",
+    "caso": "Listado de colaboradores con búsqueda, filtros y orden",
+    "resultado": "Capturado"
+  },
+  {
+    "id": "03",
+    "caso": "Detalle de colaborador (antigüedad, salario vigente, permisos)",
+    "resultado": "Capturado"
+  },
+  {
+    "id": "04",
+    "caso": "Historial de aumentos salariales",
+    "resultado": "Capturado"
+  },
+  {
+    "id": "05",
+    "caso": "Formulario de registro vacío",
+    "resultado": "Capturado"
+  },
+  {
+    "id": "06",
+    "caso": "R1 · Registrar con todos los campos vacíos",
+    "resultado": "RECHAZADO (validación propia)",
+    "detalle": "El número de empleado es obligatorio. / El nombre es obligatorio. / Los apellidos son obligatorios. / El correo electrónico es obligatorio. / El teléfono es obligatorio. / La fecha de nacimiento es obligatoria. / La fecha de ingreso es obligatoria. / El puesto es obligatorio. / El salario debe ser mayor a cero."
+  },
+  {
+    "id": "07",
+    "caso": "R3+R2 · Número y correo duplicados + fecha de ingreso futura",
+    "resultado": "RECHAZADO",
+    "detalle": "Ya existe un empleado con ese número. / Ya existe un empleado con ese correo. / La fecha de ingreso no puede ser futura."
+  },
+  {
+    "id": "08",
+    "caso": "R2 · Salario negativo + menor de edad + nombre con puros espacios",
+    "resultado": "RECHAZADO",
+    "detalle": "El nombre es obligatorio. / El colaborador debe tener al menos 18 años al ingresar. / El salario debe ser mayor a cero."
+  },
+  {
+    "id": "09",
+    "caso": "R2 · Salario $0 y fecha de nacimiento de menor de edad (2015)",
+    "resultado": "RECHAZADO",
+    "detalle": "El colaborador debe tener al menos 18 años al ingresar. / El salario debe ser mayor a cero."
+  },
+  {
+    "id": "10",
+    "caso": "R5 · Aumento de $10,000 sobre salario vigente de $24,500 (con motivo)",
+    "resultado": "RECHAZADO",
+    "detalle": "El nuevo salario debe ser mayor al salario vigente."
+  },
+  {
+    "id": "11",
+    "caso": "R5 · Aumento de $50,000 sobre $24,500 (+104%), con motivo",
+    "resultado": "ACEPTADO SIN ADVERTENCIA — carencia",
+    "detalle": ""
+  },
+  {
+    "id": "12",
+    "caso": "M3 · Aumento con fecha 2020 (anterior al último aumento registrado)",
+    "resultado": "RECHAZADO",
+    "detalle": "Ya existe un aumento con fecha posterior a la capturada."
+  },
+  {
+    "id": "13",
+    "caso": "R2 · Permiso con fecha de término anterior al inicio",
+    "resultado": "RECHAZADO",
+    "detalle": "La fecha de término no puede ser anterior al inicio."
+  },
+  {
+    "id": "14",
+    "caso": "R2 · Permiso que inicia antes de la fecha de ingreso",
+    "resultado": "RECHAZADO",
+    "detalle": "El permiso no puede iniciar antes de la fecha de ingreso."
+  },
+  {
+    "id": "15",
+    "caso": "R2 · Permiso traslapado con otro ya registrado",
+    "resultado": "RECHAZADO",
+    "detalle": "Ya existe un permiso registrado en ese periodo."
+  },
+  {
+    "id": "16",
+    "caso": "R3 · Editar un colaborador y asignarle el correo de otro",
+    "resultado": "RECHAZADO",
+    "detalle": "Ya existe un empleado con ese correo."
+  },
+  {
+    "id": "17",
+    "caso": "R4 · Eliminar un colaborador con permisos y aumentos registrados",
+    "resultado": "PIDIÓ CONFIRMACIÓN (modal propio)",
+    "detalle": "antes: 9 de 9 registros | después: 9 de 9 registros"
+  },
+  {
+    "id": "18-19",
+    "caso": "M5 · Vista en móvil (375px)",
+    "resultado": "Sin desbordamiento horizontal",
+    "detalle": ""
+  }
+]
