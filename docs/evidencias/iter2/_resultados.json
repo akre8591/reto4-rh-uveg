@@ -1,0 +1,86 @@
+[
+  {
+    "id": "01",
+    "c": "A1 · ¿Existe la pestaña Bitácora?",
+    "r": "SÍ",
+    "d": "[\"Permisos (1)\",\"Aumentos (1)\",\"Bitácora (3)\"]"
+  },
+  {
+    "id": "02",
+    "c": "A1 · Bitácora derivada de los datos existentes",
+    "r": "3 movimientos",
+    "d": "10/10/2025, 10:00 a.m.\tPermiso\tPermiso con goce de sueldo del 03/11/2025 al 07/11/2025: Vacaciones programadas · Estatus del permiso · —\tAprobado || 20/02/2023, 10:00 a.m.\tAumento salarial\tAumento aplicado con fecha 01/0"
+  },
+  {
+    "id": "03",
+    "c": "A1 · Editar el puesto",
+    "r": "REGISTRADO",
+    "d": "3 → 4 | 27/09/2026, 07:37 a.m.\tDatos generales\tSe modificó puesto. · Puesto · Analista de Recursos Humanos\tJefa de Recursos Humanos"
+  },
+  {
+    "id": "04",
+    "c": "A1 · Editar dos campos a la vez",
+    "r": "UNA ENTRADA POR CAMPO",
+    "d": "3 → 5 | 27/09/2026, 07:37 a.m.\tDatos generales\tSe modificó teléfono. · Teléfono · 4773216549\t4779999999 || 27/09/2026, 07:37 a.m.\tDatos generales\tSe modificó puesto. · Puesto · Analista de Recursos Humanos\tCoordinadora de Person"
+  },
+  {
+    "id": "05",
+    "c": "A1 · Archivado registrado",
+    "r": "SÍ",
+    "d": "27/09/2026, 07:37 a.m.\tArchivado\tEl expediente fue archivado y dejó de aparecer en el listado activo.\t—\t—"
+  },
+  {
+    "id": "06",
+    "c": "A1 · Reactivación registrada",
+    "r": "SÍ",
+    "d": "27/09/2026, 07:37 a.m.\tReactivación\tEl expediente fue reactivado y volvió al listado activo.\t—\t—"
+  },
+  {
+    "id": "07",
+    "c": "A1 · Aumento registrado en la bitácora",
+    "r": "SÍ",
+    "d": "3 → 4 | 27/09/2026, 07:37 a.m.\tAumento salarial\tAumento aplicado con fecha 27/09/2026: Revisión anual · Salario · $24,500.00\t$26,000.00"
+  },
+  {
+    "id": "08",
+    "c": "A1 · Alta de permiso registrada",
+    "r": "SÍ",
+    "d": "3 → 4"
+  },
+  {
+    "id": "09",
+    "c": "A1 · Cambio de estatus de permiso",
+    "r": "REGISTRADO",
+    "d": "4 → 5 | 27/09/2026, 07:37 a.m.\tEstatus de permiso\tEl permiso del 05/10/2026 al 08/10/2026 cambió de estatus. · Estatus del permiso · Pendiente\tAprobado"
+  },
+  {
+    "id": "10",
+    "c": "A1 · Mismo estatus otra vez (no debe duplicar)",
+    "r": "SIN RUIDO",
+    "d": "5 → 5"
+  },
+  {
+    "id": "11",
+    "c": "A1 · Eliminación de permiso deja rastro",
+    "r": "SÍ",
+    "d": "5 → 6 | 27/09/2026, 07:38 a.m.\tPermiso eliminado\tSe eliminó el permiso con goce de sueldo del 05/10/2026 al 08/10/2026.\t—\t—"
+  },
+  {
+    "id": "12",
+    "c": "A1 · Alta de colaborador registrada",
+    "r": "SÍ",
+    "d": "27/09/2026, 07:38 a.m.\tAlta\tAlta del colaborador con fecha de ingreso 01/02/2024. · Salario inicial · —\t$23,000.00"
+  },
+  {
+    "id": "13",
+    "c": "Migración · Salto directo de v1 a v3",
+    "r": "DATOS MIGRADOS",
+    "d": "bitácora reconstruida: 3 movimientos | claves: [\"rh-uveg:employees:v1\",\"rh-uveg:employees:v3\"]"
+  },
+  {
+    "id": "14",
+    "c": "Regresión · R5 sigue pidiendo confirmación",
+    "r": "SÍ",
+    "d": "Confirmar aumento superior al umbral | ✕ |  | El incremento de $24,500.00 a $60,000.00 representa un +144.90%, por encima del 20 % permitido sin confirmación. Verifica qu"
+  }
+]

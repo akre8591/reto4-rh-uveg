@@ -6,8 +6,15 @@ import {
   LEAVE_TYPE_LABEL,
   STATUS_LABEL,
 } from '../lib/labels'
-import { calculateSeniority, daysBetween, formatDate, formatShortDate } from '../lib/dates'
+import {
+  calculateSeniority,
+  daysBetween,
+  formatDate,
+  formatDateTime,
+  formatShortDate,
+} from '../lib/dates'
 import { formatCurrency, formatPercent, fullName, initials } from '../lib/format'
+import { ACTIVITY_TONE, ACTIVITY_TYPE_LABEL, sortActivity } from '../lib/activity'
 import { Badge, ConfirmDialog, EmptyState } from './ui'
 
 interface Props {
@@ -39,7 +46,7 @@ export function EmployeeDetail({
   onChangeLeaveStatus,
   onRemoveLeave,
 }: Props) {
-  const [tab, setTab] = useState<'permisos' | 'aumentos'>('permisos')
+  const [tab, setTab] = useState<'permisos' | 'aumentos' | 'bitacora'>('permisos')
   const [leaveToDelete, setLeaveToDelete] = useState<string | null>(null)
 
   const seniority = useMemo(() => calculateSeniority(employee.hireDate), [employee.hireDate])
@@ -48,6 +55,7 @@ export function EmployeeDetail({
     () => [...employee.leaves].sort((a, b) => b.startDate.localeCompare(a.startDate)),
     [employee.leaves],
   )
+  const activity = useMemo(() => sortActivity(employee.activity ?? []), [employee.activity])
   const raises = useMemo(
     () => [...employee.raises].sort((a, b) => b.effectiveDate.localeCompare(a.effectiveDate)),
     [employee.raises],
@@ -202,6 +210,15 @@ export function EmployeeDetail({
           >
             Aumentos ({raises.length})
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'bitacora'}
+            className={`tab${tab === 'bitacora' ? ' tab--active' : ''}`}
+            onClick={() => setTab('bitacora')}
+          >
+            Bitácora ({activity.length})
+          </button>
         </div>
 
         {tab === 'permisos' ? (
@@ -268,41 +285,80 @@ export function EmployeeDetail({
               </table>
             </div>
           )
-        ) : raises.length === 0 ? (
+        ) : tab === 'aumentos' ? (
+          raises.length === 0 ? (
+            <EmptyState
+              title="Sin aumentos registrados"
+              message="Al registrar un aumento se actualiza automáticamente el salario vigente."
+            />
+          ) : (
+            <div className="table-wrapper">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Salario anterior</th>
+                    <th>Nuevo salario</th>
+                    <th>Incremento</th>
+                    <th>Motivo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {raises.map((raise) => {
+                    const diff = raise.newSalary - raise.previousSalary
+                    const percent = raise.previousSalary > 0 ? (diff / raise.previousSalary) * 100 : 0
+                    return (
+                      <tr key={raise.id}>
+                        <td>{formatShortDate(raise.effectiveDate)}</td>
+                        <td>{formatCurrency(raise.previousSalary)}</td>
+                        <td>
+                          <strong>{formatCurrency(raise.newSalary)}</strong>
+                        </td>
+                        <td className="text-positive">
+                          {formatCurrency(diff)} ({formatPercent(percent)})
+                        </td>
+                        <td className="table__reason">{raise.reason}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )
+        ) : activity.length === 0 ? (
           <EmptyState
-            title="Sin aumentos registrados"
-            message="Al registrar un aumento se actualiza automáticamente el salario vigente."
+            title="Sin movimientos registrados"
+            message="La bitácora mostrará aquí cada cambio realizado sobre el expediente."
           />
         ) : (
           <div className="table-wrapper">
             <table className="table">
               <thead>
                 <tr>
-                  <th>Fecha</th>
-                  <th>Salario anterior</th>
-                  <th>Nuevo salario</th>
-                  <th>Incremento</th>
-                  <th>Motivo</th>
+                  <th>Fecha y hora</th>
+                  <th>Movimiento</th>
+                  <th>Detalle</th>
+                  <th>Valor anterior</th>
+                  <th>Valor nuevo</th>
                 </tr>
               </thead>
               <tbody>
-                {raises.map((raise) => {
-                  const diff = raise.newSalary - raise.previousSalary
-                  const percent = raise.previousSalary > 0 ? (diff / raise.previousSalary) * 100 : 0
-                  return (
-                    <tr key={raise.id}>
-                      <td>{formatShortDate(raise.effectiveDate)}</td>
-                      <td>{formatCurrency(raise.previousSalary)}</td>
-                      <td>
-                        <strong>{formatCurrency(raise.newSalary)}</strong>
-                      </td>
-                      <td className="text-positive">
-                        {formatCurrency(diff)} ({formatPercent(percent)})
-                      </td>
-                      <td className="table__reason">{raise.reason}</td>
-                    </tr>
-                  )
-                })}
+                {activity.map((entry) => (
+                  <tr key={entry.id}>
+                    <td>{formatDateTime(entry.at)}</td>
+                    <td>
+                      <Badge tone={ACTIVITY_TONE[entry.type]}>
+                        {ACTIVITY_TYPE_LABEL[entry.type]}
+                      </Badge>
+                    </td>
+                    <td className="table__reason">
+                      {entry.description}
+                      {entry.field ? <small className="cell-sub">{entry.field}</small> : null}
+                    </td>
+                    <td>{entry.previousValue ?? '—'}</td>
+                    <td>{entry.newValue ?? '—'}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

@@ -1,9 +1,15 @@
 import type { Employee } from '../types'
 import { SEED_EMPLOYEES } from './seed'
+import { deriveActivity } from './activity'
 
-const STORAGE_KEY = 'rh-uveg:employees:v2'
-/** Key used before the archiving feature; its contents are migrated once. */
-const LEGACY_STORAGE_KEY = 'rh-uveg:employees:v1'
+export { createId } from './id'
+
+const STORAGE_KEY = 'rh-uveg:employees:v3'
+/**
+ * Keys used by previous versions, newest first. Their contents are migrated once instead
+ * of being discarded: v1 predates archiving, v2 predates the audit trail.
+ */
+const LEGACY_STORAGE_KEYS = ['rh-uveg:employees:v2', 'rh-uveg:employees:v1']
 
 function isEmployeeArray(value: unknown): value is Employee[] {
   return (
@@ -30,8 +36,9 @@ export function loadEmployees(): Employee[] {
       return isEmployeeArray(parsed) ? normalize(parsed) : SEED_EMPLOYEES
     }
 
-    const legacyRaw = window.localStorage.getItem(LEGACY_STORAGE_KEY)
-    if (legacyRaw) {
+    for (const legacyKey of LEGACY_STORAGE_KEYS) {
+      const legacyRaw = window.localStorage.getItem(legacyKey)
+      if (!legacyRaw) continue
       const legacy: unknown = JSON.parse(legacyRaw)
       if (isEmployeeArray(legacy)) {
         const migrated = normalize(legacy)
@@ -49,12 +56,16 @@ export function loadEmployees(): Employee[] {
 
 /** Fills in fields added after a record was saved, so older data keeps working. */
 function normalize(employees: Employee[]): Employee[] {
-  return employees.map((employee) => ({
-    ...employee,
-    leaves: employee.leaves ?? [],
-    raises: employee.raises ?? [],
-    archivedAt: employee.archivedAt ?? null,
-  }))
+  return employees.map((employee) => {
+    const record = {
+      ...employee,
+      leaves: employee.leaves ?? [],
+      raises: employee.raises ?? [],
+      archivedAt: employee.archivedAt ?? null,
+    }
+    // Records saved before the audit trail existed get one rebuilt from their own history.
+    return { ...record, activity: employee.activity ?? deriveActivity(record) }
+  })
 }
 
 export function saveEmployees(employees: Employee[]): void {
@@ -68,12 +79,8 @@ export function saveEmployees(employees: Employee[]): void {
 export function clearEmployees(): void {
   try {
     window.localStorage.removeItem(STORAGE_KEY)
-    window.localStorage.removeItem(LEGACY_STORAGE_KEY)
+    for (const legacyKey of LEGACY_STORAGE_KEYS) window.localStorage.removeItem(legacyKey)
   } catch {
     // Ignored on purpose.
   }
-}
-
-export function createId(prefix: string): string {
-  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 }

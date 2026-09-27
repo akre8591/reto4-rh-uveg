@@ -10,6 +10,16 @@ import type {
 } from '../types'
 import { clearEmployees, createId, loadEmployees, saveEmployees } from '../lib/storage'
 import { SEED_EMPLOYEES } from '../lib/seed'
+import {
+  createActivityEntry,
+  diffEmployee,
+  leaveActivity,
+  raiseActivity,
+  withActivity,
+} from '../lib/activity'
+import { LEAVE_STATUS_LABEL, LEAVE_TYPE_LABEL } from '../lib/labels'
+import { formatShortDate } from '../lib/dates'
+import { formatCurrency } from '../lib/format'
 
 /** Single source of truth for the roster, persisted in localStorage. */
 export function useEmployees() {
@@ -26,14 +36,26 @@ export function useEmployees() {
       archivedAt: null,
       leaves: [],
       raises: [],
+      activity: [
+        createActivityEntry(
+          'alta',
+          `Alta del colaborador con fecha de ingreso ${formatShortDate(input.hireDate)}.`,
+          { field: 'Salario inicial', newValue: formatCurrency(input.salary) },
+        ),
+      ],
     }
     setEmployees((current) => [...current, employee])
     return employee
   }, [])
 
+  /** Updates the general data and records one audit entry per field that changed. */
   const updateEmployee = useCallback((id: string, input: EmployeeInput) => {
     setEmployees((current) =>
-      current.map((employee) => (employee.id === id ? { ...employee, ...input } : employee)),
+      current.map((employee) =>
+        employee.id === id
+          ? withActivity({ ...employee, ...input }, ...diffEmployee(employee, input))
+          : employee,
+      ),
     )
   }, [])
 
@@ -46,7 +68,13 @@ export function useEmployees() {
     setEmployees((current) =>
       current.map((employee) =>
         employee.id === id
-          ? { ...employee, archivedAt: new Date().toISOString() }
+          ? withActivity(
+              { ...employee, archivedAt: new Date().toISOString() },
+              createActivityEntry(
+                'archivado',
+                'El expediente fue archivado y dejó de aparecer en el listado activo.',
+              ),
+            )
           : employee,
       ),
     )
@@ -55,7 +83,15 @@ export function useEmployees() {
   const restoreEmployee = useCallback((id: string) => {
     setEmployees((current) =>
       current.map((employee) =>
-        employee.id === id ? { ...employee, archivedAt: null } : employee,
+        employee.id === id
+          ? withActivity(
+              { ...employee, archivedAt: null },
+              createActivityEntry(
+                'reactivacion',
+                'El expediente fue reactivado y volvió al listado activo.',
+              ),
+            )
+          : employee,
       ),
     )
   }, [])
@@ -65,7 +101,10 @@ export function useEmployees() {
     setEmployees((current) =>
       current.map((employee) =>
         employee.id === employeeId
-          ? { ...employee, leaves: [...employee.leaves, leave] }
+          ? withActivity(
+              { ...employee, leaves: [...employee.leaves, leave] },
+              leaveActivity(leave),
+            )
           : employee,
       ),
     )
@@ -76,12 +115,7 @@ export function useEmployees() {
       setEmployees((current) =>
         current.map((employee) =>
           employee.id === employeeId
-            ? {
-                ...employee,
-                leaves: employee.leaves.map((leave) =>
-                  leave.id === leaveId ? { ...leave, status } : leave,
-                ),
-              }
+            ? recordLeaveStatusChange(employee, leaveId, status)
             : employee,
         ),
       )
@@ -91,11 +125,24 @@ export function useEmployees() {
 
   const removeLeave = useCallback((employeeId: string, leaveId: string) => {
     setEmployees((current) =>
-      current.map((employee) =>
-        employee.id === employeeId
-          ? { ...employee, leaves: employee.leaves.filter((leave) => leave.id !== leaveId) }
-          : employee,
-      ),
+      current.map((employee) => {
+        if (employee.id !== employeeId) return employee
+        const removed = employee.leaves.find((leave) => leave.id === leaveId)
+        const entries = removed
+          ? [
+              createActivityEntry(
+                'permiso_baja',
+                `Se eliminó el permiso ${LEAVE_TYPE_LABEL[removed.type].toLowerCase()} del ${formatShortDate(
+                  removed.startDate,
+                )} al ${formatShortDate(removed.endDate)}.`,
+              ),
+            ]
+          : []
+        return withActivity(
+          { ...employee, leaves: employee.leaves.filter((leave) => leave.id !== leaveId) },
+          ...entries,
+        )
+      }),
     )
   }, [])
 
@@ -112,7 +159,10 @@ export function useEmployees() {
           reason: input.reason,
           createdAt: new Date().toISOString(),
         }
-        return { ...employee, salary: input.newSalary, raises: [...employee.raises, raise] }
+        return withActivity(
+          { ...employee, salary: input.newSalary, raises: [...employee.raises, raise] },
+          raiseActivity(raise),
+        )
       }),
     )
   }, [])
@@ -134,4 +184,34 @@ export function useEmployees() {
     addRaise,
     resetData,
   }
+}
+
+/** Applies a new status to a leave and records the change in the audit trail. */
+function recordLeaveStatusChange(
+  employee: Employee,
+  leaveId: string,
+  status: LeaveStatus,
+): Employee {
+  const leave = employee.leaves.find((item) => item.id === leaveId)
+  if (!leave || leave.status === status) return employee
+
+  return withActivity(
+    {
+      ...employee,
+      leaves: employee.leaves.map((item) =>
+        item.id === leaveId ? { ...item, status } : item,
+      ),
+    },
+    createActivityEntry(
+      'permiso_estatus',
+      `El permiso del ${formatShortDate(leave.startDate)} al ${formatShortDate(
+        leave.endDate,
+      )} cambió de estatus.`,
+      {
+        field: 'Estatus del permiso',
+        previousValue: LEAVE_STATUS_LABEL[leave.status],
+        newValue: LEAVE_STATUS_LABEL[status],
+      },
+    ),
+  )
 }

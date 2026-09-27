@@ -46,6 +46,19 @@ export function formatShortDate(value: string): string {
   })
 }
 
+/** Formats an ISO timestamp as date and time, for the audit trail. */
+export function formatDateTime(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleString('es-MX', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 /** Inclusive number of calendar days between two ISO dates. */
 export function daysBetween(startISO: string, endISO: string): number {
   const start = parseISO(startISO)

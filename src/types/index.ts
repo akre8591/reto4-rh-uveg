@@ -23,6 +23,31 @@ export interface Raise {
   createdAt: string
 }
 
+/** Kinds of movement recorded in an employee's audit trail. */
+export type ActivityType =
+  | 'alta'
+  | 'datos'
+  | 'estatus'
+  | 'archivado'
+  | 'reactivacion'
+  | 'aumento'
+  | 'permiso'
+  | 'permiso_estatus'
+  | 'permiso_baja'
+
+export interface ActivityEntry {
+  id: string
+  /** ISO timestamp of the movement. */
+  at: string
+  type: ActivityType
+  /** Human readable summary of the movement, in Spanish. */
+  description: string
+  /** Name of the affected field, when the movement changed a single value. */
+  field?: string
+  previousValue?: string
+  newValue?: string
+}
+
 export interface Employee {
   id: string
   employeeNumber: string
@@ -41,9 +66,14 @@ export interface Employee {
   archivedAt: string | null
   leaves: Leave[]
   raises: Raise[]
+  /** Audit trail of every movement registered for this employee. */
+  activity: ActivityEntry[]
 }
 
-export type EmployeeInput = Omit<Employee, 'id' | 'leaves' | 'raises' | 'archivedAt'>
+export type EmployeeInput = Omit<
+  Employee,
+  'id' | 'leaves' | 'raises' | 'archivedAt' | 'activity'
+>
 
 export type LeaveInput = Omit<Leave, 'id' | 'createdAt'>
 

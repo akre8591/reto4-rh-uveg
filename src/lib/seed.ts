@@ -1,10 +1,11 @@
 import type { Employee } from '../types'
+import { deriveActivity } from './activity'
 
 /**
  * Sample roster used the first time the application runs. Hire dates are spread
  * over several years so the seniority calculation shows varied results.
  */
-export const SEED_EMPLOYEES: Employee[] = [
+const SEED_RECORDS: Omit<Employee, 'activity'>[] = [
   {
     id: 'emp-001',
     employeeNumber: 'RH-001',
@@ -272,3 +273,9 @@ export const SEED_EMPLOYEES: Employee[] = [
     raises: [],
   },
 ]
+
+/** Each sample record carries the audit trail derived from its own history. */
+export const SEED_EMPLOYEES: Employee[] = SEED_RECORDS.map((record) => ({
+  ...record,
+  activity: deriveActivity(record),
+}))
