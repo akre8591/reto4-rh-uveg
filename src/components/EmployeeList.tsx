@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import type { Employee } from '../types'
-import { DEPARTMENTS, STATUS_LABEL } from '../lib/labels'
+import type { Employee, LeaveType } from '../types'
+import { DEPARTMENTS, LEAVE_TYPE_LABEL, SENIORITY_RANGES, STATUS_LABEL } from '../lib/labels'
 import { calculateSeniority, formatShortDate } from '../lib/dates'
 import { formatCurrency, fullName, initials } from '../lib/format'
 import { Badge, EmptyState } from './ui'
@@ -16,6 +16,7 @@ interface Props {
 
 type SortKey = 'name' | 'hireDate' | 'salary' | 'department'
 type ArchiveView = 'activos' | 'archivados' | 'todos'
+type LeaveFilter = 'todos' | LeaveType
 
 export function EmployeeList({
   employees,
@@ -29,7 +30,11 @@ export function EmployeeList({
   const [department, setDepartment] = useState('todos')
   const [status, setStatus] = useState('todos')
   const [archiveView, setArchiveView] = useState<ArchiveView>('activos')
+  const [leaveType, setLeaveType] = useState<LeaveFilter>('todos')
+  const [seniorityRange, setSeniorityRange] = useState('todos')
   const [sortKey, setSortKey] = useState<SortKey>('name')
+
+  const archivedCount = employees.filter((employee) => employee.archivedAt !== null).length
 
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -46,7 +51,17 @@ export function EmployeeList({
       const matchesArchive =
         archiveView === 'todos' ||
         (archiveView === 'archivados' ? isArchived : !isArchived)
-      return matchesTerm && matchesDepartment && matchesStatus && matchesArchive
+      const matchesLeaveType =
+        leaveType === 'todos' || employee.leaves.some((leave) => leave.type === leaveType)
+      const matchesSeniority = matchesSeniorityRange(employee, seniorityRange)
+      return (
+        matchesTerm &&
+        matchesDepartment &&
+        matchesStatus &&
+        matchesArchive &&
+        matchesLeaveType &&
+        matchesSeniority
+      )
     })
 
     return filtered.sort((a, b) => {
@@ -61,7 +76,7 @@ export function EmployeeList({
           return fullName(a).localeCompare(fullName(b), 'es')
       }
     })
-  }, [employees, search, department, status, archiveView, sortKey])
+  }, [employees, search, department, status, archiveView, leaveType, seniorityRange, sortKey])
 
   return (
     <section className="list">
@@ -69,8 +84,8 @@ export function EmployeeList({
         <div>
           <h2>Colaboradores</h2>
           <p className="section-header__meta">
-            {visible.length} de {employees.length} registros ·{' '}
-            {employees.filter((employee) => employee.archivedAt !== null).length} archivados
+            {visible.length} de {employees.length} registros · {archivedCount}{' '}
+            {archivedCount === 1 ? 'archivado' : 'archivados'}
           </p>
         </div>
         <button type="button" className="button button--primary" onClick={onCreate}>
@@ -119,6 +134,30 @@ export function EmployeeList({
           <option value="activos">Solo expedientes activos</option>
           <option value="archivados">Solo expedientes archivados</option>
           <option value="todos">Activos y archivados</option>
+        </select>
+        <select
+          value={leaveType}
+          aria-label="Filtrar por tipo de permiso"
+          onChange={(event) => setLeaveType(event.target.value as LeaveFilter)}
+        >
+          <option value="todos">Cualquier tipo de permiso</option>
+          {Object.entries(LEAVE_TYPE_LABEL).map(([value, label]) => (
+            <option key={value} value={value}>
+              Con permisos {label.toLowerCase()}
+            </option>
+          ))}
+        </select>
+        <select
+          value={seniorityRange}
+          aria-label="Filtrar por rango de antigüedad"
+          onChange={(event) => setSeniorityRange(event.target.value)}
+        >
+          <option value="todos">Cualquier antigüedad</option>
+          {SENIORITY_RANGES.map((range) => (
+            <option key={range.id} value={range.id}>
+              {range.label}
+            </option>
+          ))}
         </select>
         <select
           value={sortKey}
@@ -230,4 +269,13 @@ export function EmployeeList({
       )}
     </section>
   )
+}
+
+/** True when the employee's seniority falls inside the selected range. */
+function matchesSeniorityRange(employee: Employee, rangeId: string): boolean {
+  if (rangeId === 'todos') return true
+  const range = SENIORITY_RANGES.find((item) => item.id === rangeId)
+  if (!range) return true
+  const { years } = calculateSeniority(employee.hireDate)
+  return years >= range.minYears && (range.maxYears === null || years < range.maxYears)
 }

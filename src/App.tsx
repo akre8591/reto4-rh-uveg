@@ -97,7 +97,7 @@ export default function App() {
             className="button button--ghost button--tiny"
             onClick={() => setDialog('reiniciar')}
           >
-            Restaurar datos
+            Restaurar datos de ejemplo
           </button>
         </nav>
       </header>
@@ -217,7 +217,7 @@ export default function App() {
         <ConfirmDialog
           title="Restaurar datos de ejemplo"
           message="Se reemplazará la información actual por el catálogo de ejemplo. Esta acción no se puede deshacer."
-          confirmLabel="Restaurar"
+          confirmLabel="Restaurar datos de ejemplo"
           onCancel={() => setDialog(null)}
           onConfirm={() => {
             resetData()

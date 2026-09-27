@@ -221,12 +221,12 @@ h3 {
 /* ---------- Filters ---------- */
 .filters {
   display: grid;
-  grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
 }
 
 .filters__search {
-  grid-column: span 1;
+  grid-column: span 2;
 }
 
 /* ---------- Form controls ---------- */
@@ -780,6 +780,10 @@ textarea {
     grid-template-columns: 1fr 1fr;
   }
 
+  .filters__search {
+    grid-column: span 2;
+  }
+
   .topbar {
     padding: 16px;
   }
@@ -788,6 +792,10 @@ textarea {
 @media (max-width: 560px) {
   .filters {
     grid-template-columns: 1fr;
+  }
+
+  .filters__search {
+    grid-column: span 1;
   }
 
   .detail__actions,

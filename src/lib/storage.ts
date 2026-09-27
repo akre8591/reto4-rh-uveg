@@ -43,6 +43,7 @@ export function loadEmployees(): Employee[] {
       if (isEmployeeArray(legacy)) {
         const migrated = normalize(legacy)
         saveEmployees(migrated)
+        removeLegacyKeys()
         return migrated
       }
     }
@@ -68,6 +69,15 @@ function normalize(employees: Employee[]): Employee[] {
   })
 }
 
+/** Drops the keys of previous versions, already migrated to the current one. */
+function removeLegacyKeys(): void {
+  try {
+    for (const legacyKey of LEGACY_STORAGE_KEYS) window.localStorage.removeItem(legacyKey)
+  } catch {
+    // Ignored on purpose: leaving the old key behind is harmless.
+  }
+}
+
 export function saveEmployees(employees: Employee[]): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(employees))
@@ -79,7 +89,7 @@ export function saveEmployees(employees: Employee[]): void {
 export function clearEmployees(): void {
   try {
     window.localStorage.removeItem(STORAGE_KEY)
-    for (const legacyKey of LEGACY_STORAGE_KEYS) window.localStorage.removeItem(legacyKey)
+    removeLegacyKeys()
   } catch {
     // Ignored on purpose.
   }

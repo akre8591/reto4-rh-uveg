@@ -85,7 +85,7 @@ export function EmployeeDetail({
             información se conserva completa y puede consultarse en cualquier momento.
           </p>
           <button type="button" className="button button--tiny" onClick={onRestore}>
-            Reactivar colaborador
+            Reactivar
           </button>
         </div>
       ) : null}

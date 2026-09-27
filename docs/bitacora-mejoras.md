@@ -110,8 +110,8 @@ por los cambios (evidencia 13). La compilación de TypeScript se ejecuta sin err
 
 Tres detalles menores, detectados durante la verificación, quedan anotados para el
 refinamiento de interfaz de la iteración 3: la clave de almacenamiento anterior no se
-elimina después de migrar, por lo que permanece como dato residual; la acción se denomina
-"Reactivar" en el listado y "Restaurar" en el expediente, lo que conviene unificar; y el
+elimina después de migrar, por lo que permanece como dato residual; una posible ambigüedad
+de terminología en torno a la acción de reactivar un expediente, que conviene revisar; y el
 contador del encabezado no concuerda en número cuando hay un solo registro archivado.
 
 Se deja constancia además de una decisión de diseño: archivar solicita confirmación y
@@ -122,36 +122,189 @@ vistas y los indicadores mientras que reactivar lo devuelve a ellas sin pérdida
 
 ## Iteración 2 — Trazabilidad
 
-**Fecha:** _(pendiente)_
+**Fecha:** 27 de septiembre de 2026
 **Alcance:** A1 (bitácora completa de cambios)
+**Evidencias:** `docs/evidencias/iter2/`
 
 ### Qué requería mejora
 
-_(Pendiente)_
+La evaluación de la versión 1 calificó A1 como cumplido parcialmente: el expediente
+conservaba el historial de permisos y de aumentos salariales, pero modificar los datos de
+un colaborador —su puesto, departamento, correo, teléfono o estatus— no dejaba ningún
+rastro. Una bitácora que solo cubre dos de los movimientos posibles no permite auditar
+cómo llegó un expediente a su estado actual, que es precisamente lo que la semblanza
+espera de este atributo.
+
+A esa carencia se sumó otra originada en la iteración anterior. Al sustituir el borrado
+por el archivado, se incorporaron dos operaciones nuevas —archivar y reactivar— que
+tampoco quedaban registradas en ningún sitio: el expediente mostraba la fecha del último
+archivado, pero no permitía saber cuántas veces había ocurrido ni cuándo se había
+revertido. La mejora introducida en la iteración 1 amplió, sin proponérselo, el alcance de
+la carencia que esta iteración debía resolver.
 
 ### Qué cambios se realizaron
 
-_(Pendiente)_
+**Modelo de datos.** Se incorporó al colaborador una colección de movimientos, cada uno
+con identificador, fecha y hora, tipo, descripción y, cuando aplica, el campo afectado con
+su valor anterior y su valor nuevo. Se definieron nueve tipos de movimiento: alta, cambio
+de datos generales, cambio de estatus, archivado, reactivación, aumento salarial, alta de
+permiso, cambio de estatus de permiso y eliminación de permiso.
+
+**Detección de cambios.** Un módulo nuevo se encarga de comparar la versión anterior de un
+colaborador con la editada y emitir una entrada por cada uno de los doce campos editables
+que haya cambiado, en lugar de una sola entrada genérica de "se editó el expediente". Los
+valores se presentan ya formateados según su naturaleza —el salario como moneda, las
+fechas en formato local, el estatus y el tipo de contrato con su etiqueta legible—, de modo
+que la bitácora sea comprensible para quien la consulta y no un volcado técnico. La
+generación de identificadores se extrajo a su propio módulo para romper un ciclo de
+importación entre el almacenamiento y la bitácora.
+
+**Registro de operaciones.** Se instrumentaron todas las operaciones que modifican un
+expediente. Se cuidó un caso particular: cambiar el estatus de un permiso por el mismo
+valor que ya tenía no genera ninguna entrada, para que la bitácora registre cambios reales
+y no interacciones sin efecto.
+
+**Presentación.** La bitácora se expone como una tercera pestaña del expediente, con el
+movimiento más reciente primero y un distintivo de color por tipo, junto a las pestañas de
+permisos y aumentos que ya existían.
+
+**Compatibilidad de los datos existentes.** La clave de almacenamiento pasó a una tercera
+versión. La lectura recorre las claves anteriores en orden y, para cada expediente que no
+tenga bitácora, la reconstruye a partir de su propia historia: un asiento de alta con la
+fecha de ingreso y el salario inicial, más un asiento por cada aumento y cada permiso ya
+registrados. Así, un expediente creado con cualquiera de las versiones anteriores llega a
+la versión final con una bitácora coherente en lugar de una vacía.
 
 ### Qué resultados se obtuvieron
 
-_(Pendiente)_
+Se ejecutaron dieciséis casos de prueba sobre la aplicación, cubriendo el atributo
+intervenido, la compatibilidad de los datos y las restricciones de la iteración anterior.
+
+La pestaña de bitácora aparece en el expediente con el conteo de movimientos, y los
+colaboradores de ejemplo llegan con su historial ya reconstruido (evidencia 01). Editar el
+puesto genera una entrada que indica el campo afectado y muestra el valor anterior junto al
+nuevo (evidencia 02); editar dos campos en la misma operación genera dos entradas
+independientes, una por campo, en lugar de una sola entrada agregada (evidencia 03).
+
+Las operaciones introducidas en la iteración anterior quedan ahora registradas: archivar
+produce su asiento (evidencia 04) y reactivar el suyo (evidencia 05), con lo que la
+carencia que había abierto esa iteración queda cerrada. Los aumentos salariales se
+registran con el salario anterior y el nuevo (evidencia 06), y los permisos generan asiento
+tanto al darse de alta como al cambiar de estatus, indicando el estatus previo y el
+posterior (evidencia 07). Cambiar el estatus de un permiso por el mismo valor no genera
+ninguna entrada, como se buscaba. La eliminación de un permiso deja constancia del hecho
+aunque el permiso desaparezca de su pestaña (evidencia 08), de modo que la operación sigue
+siendo auditable. El alta de un colaborador nuevo abre su bitácora con el asiento
+correspondiente y su salario inicial (evidencia 09).
+
+Sobre la compatibilidad se probaron los dos escenarios posibles. Un conjunto de datos
+guardado por la primera versión, que salta dos versiones de formato, se migra conservando
+sus registros y con la bitácora reconstruida a partir de su historial (evidencia 10); lo
+mismo ocurre con datos guardados por la versión intermedia (evidencia 13). La bitácora
+persiste correctamente después de recargar la aplicación (evidencia 12).
+
+Finalmente, se comprobó que la restricción de umbral introducida en la iteración anterior
+sigue operando: un aumento superior al veinte por ciento continúa exigiendo confirmación
+explícita con el porcentaje calculado (evidencia 11). La compilación de TypeScript se
+ejecuta sin errores.
+
+### Observaciones pendientes
+
+La bitácora reconstruida solo puede derivarse de lo que quedó guardado, de modo que los
+movimientos que la versión anterior nunca registró —un archivado posteriormente revertido,
+por ejemplo— no pueden recuperarse. Es una limitación inherente a la reconstrucción
+retroactiva y conviene enunciarla en lugar de dar a entender que la bitácora cubre toda la
+historia previa del expediente. Por la misma razón, los asientos reconstruidos llevan una
+hora convencional, ya que las versiones anteriores solo guardaban la fecha.
+
+Se mantiene, además, la observación de la iteración anterior sobre la clave de
+almacenamiento previa, que sigue sin eliminarse tras la migración.
 
 ---
 
-## Iteración 3 — Consulta y toma de decisiones
+## Iteración 3 — Consulta y refinamiento
 
-**Fecha:** _(pendiente)_
-**Alcance:** A3 (filtros faltantes) y saldo de días de vacaciones
+**Fecha:** 27 de septiembre de 2026
+**Alcance:** A3 (filtros faltantes) y los detalles de pulido arrastrados
+**Evidencias:** `docs/evidencias/iter3/`
 
 ### Qué requería mejora
 
-_(Pendiente)_
+La evaluación de la versión 1 calificó A3 como cumplido parcialmente. La semblanza define
+cuatro criterios de consulta —nombre, departamento, tipo de permiso y rango de
+antigüedad— y la aplicación resolvía los dos primeros mediante una búsqueda por texto y un
+filtro por departamento, pero no ofrecía forma alguna de responder preguntas como qué
+colaboradores han solicitado permisos sin goce de sueldo o cuáles superan los diez años en
+la organización. Al tratarse del atributo que sostiene la consulta de información, su
+cumplimiento parcial limitaba el objetivo declarado del caso.
+
+A esa carencia se sumaron los tres detalles que las verificaciones de las iteraciones
+anteriores habían dejado anotados: las claves de almacenamiento de versiones previas
+permanecían en el navegador después de migrar los datos, el contador de expedientes
+archivados no concordaba en número cuando había uno solo, y quedaba por revisar una posible
+ambigüedad en la terminología de la acción de reactivar.
 
 ### Qué cambios se realizaron
 
-_(Pendiente)_
+**Filtros de consulta.** Se definieron cinco rangos de antigüedad —menos de un año, de uno
+a tres, de tres a cinco, de cinco a diez y más de diez— como un catálogo, en años cumplidos
+sobre la fecha de ingreso, de modo que el criterio sea el mismo que ya emplea el cálculo de
+antigüedad del expediente. Sobre esa base se añadieron dos controles al listado: uno que
+filtra por tipo de permiso, mostrando a los colaboradores que tengan al menos un permiso
+con goce o sin goce de sueldo según lo elegido, y otro que filtra por rango de antigüedad.
+
+Ambos se incorporaron al mismo cálculo que ya resolvía los filtros existentes, de manera
+que se combinan entre sí y con la búsqueda por texto, el departamento, el estatus, el
+estado de archivado y el ordenamiento. La rejilla de controles se convirtió en un diseño
+adaptable, porque con siete controles la disposición fija se rompía en pantallas
+estrechas.
+
+**Pulido.** El contador del encabezado concuerda ahora en número. La migración de datos
+elimina las claves de versiones anteriores una vez completada, en lugar de dejarlas como
+residuo, y lo mismo ocurre al restaurar los datos de ejemplo.
+
+**Revisión de la terminología.** Al ir a corregir la ambigüedad anotada se encontró que la
+premisa era imprecisa: ninguna vista llamaba "Restaurar" a la reactivación de un
+colaborador —el listado y el expediente decían "Reactivar" en ambos casos—. El término
+aparecía únicamente en la acción de la barra superior que repone los datos de ejemplo, que
+es una operación distinta y probablemente el origen de la confusión. Se unificó en los dos
+sentidos: la acción sobre el colaborador se llama "Reactivar" en todas las vistas, y la de
+la barra superior pasó a llamarse "Restaurar datos de ejemplo", que describe con precisión
+lo que hace.
 
 ### Qué resultados se obtuvieron
 
-_(Pendiente)_
+Se ejecutaron doce casos de prueba, cubriendo los filtros nuevos, sus combinaciones, los
+tres detalles de pulido y las restricciones introducidas en las iteraciones anteriores.
+
+El listado presenta ahora los siete controles de consulta. El filtro por tipo de permiso
+devuelve tres colaboradores para permisos sin goce de sueldo y otros tres para permisos con
+goce, en ambos casos los que efectivamente tienen un permiso de ese tipo registrado
+(evidencias 02 y 03). El filtro por antigüedad devuelve dos colaboradores con más de diez
+años y uno con menos de un año, lo que coincide con las fechas de ingreso de la plantilla
+(evidencias 04 y 05). Combinar ambos filtros reduce el resultado a un único colaborador, el
+que cumple las dos condiciones a la vez (evidencia 06), y la combinación sigue funcionando
+al añadir la búsqueda por texto (evidencia 07).
+
+Sobre el pulido, el contador muestra "1 archivado" con un registro y "2 archivados" con dos
+(evidencia 08); la acción aparece como "Reactivar" tanto en el listado como en el
+expediente (evidencia 09); y al cargar la aplicación con datos guardados bajo las dos
+claves anteriores, la migración toma la más reciente, reconstruye la bitácora y deja
+únicamente la clave vigente en el navegador (evidencia 10).
+
+Finalmente se comprobó que las mejoras anteriores siguen operando: la bitácora continúa
+presente en el expediente con su historial (evidencia 11) y el umbral de confirmación de
+aumentos sigue exigiendo autorización explícita por encima del veinte por ciento
+(evidencia 12). La compilación de TypeScript se ejecuta sin errores.
+
+Con esta iteración, los ocho atributos y las cinco restricciones establecidos en la
+semblanza del caso quedan cumplidos por completo.
+
+### Observación sobre el alcance
+
+Durante la planeación se contempló incorporar además un control de saldo de días de
+vacaciones por colaborador, conforme a los días que corresponden según la antigüedad. Se
+decidió no incluirlo: no corresponde a ninguna carencia de la semblanza —el atributo de
+gestión de permisos se cumple en los términos en que fue definido— y su incorporación
+habría competido con el tiempo destinado a verificar y documentar lo ya construido. Se deja
+enunciado como línea de evolución posible de la aplicación.

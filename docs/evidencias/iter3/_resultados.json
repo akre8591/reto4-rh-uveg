@@ -1,0 +1,74 @@
+[
+  {
+    "id": "01",
+    "c": "A3 · Controles de filtrado disponibles",
+    "r": "COMPLETOS",
+    "d": "buscador: sí | selects: [\"Todos los departamentos\",\"Todos los estatus\",\"Solo expedientes activos\",\"Cualquier tipo de permiso\",\"Cualquier antigüedad\",\"Ordenar por nombre\"]"
+  },
+  {
+    "id": "02",
+    "c": "A3 · Filtro por tipo de permiso (sin goce)",
+    "r": "APLICA",
+    "d": "9 de 9 registros · 0 archivados → 3 de 9 registros · 0 archivados | opción: Con permisos sin goce de sueldo | Gabriela Ortega Cervantes, Jorge Alberto Mendoza Salas, Ricardo Vázquez Herrera"
+  },
+  {
+    "id": "03",
+    "c": "A3 · Filtro por tipo de permiso (con goce)",
+    "r": "APLICA",
+    "d": "3 de 9 registros · 0 archivados | Ana Lucía Ramírez Ponce, Diana Paola Castañeda Vela, María Fernanda Guzmán Ríos"
+  },
+  {
+    "id": "04",
+    "c": "A3 · Filtro por rango de antigüedad (más de 10 años)",
+    "r": "APLICA",
+    "d": "2 de 9 registros · 0 archivados | Jorge Alberto Mendoza Salas, María Fernanda Guzmán Ríos"
+  },
+  {
+    "id": "05",
+    "c": "A3 · Filtro por rango de antigüedad (menos de 1 año)",
+    "r": "APLICA",
+    "d": "1 de 9 registros · 0 archivados | Sofía Landa Escobar"
+  },
+  {
+    "id": "06",
+    "c": "A3 · Combinar tipo de permiso + antigüedad",
+    "r": "APLICADO",
+    "d": "1 de 9 registros · 0 archivados | Jorge Alberto Mendoza Salas"
+  },
+  {
+    "id": "07",
+    "c": "A3 · Combinar con la búsqueda por texto",
+    "r": "APLICADO",
+    "d": "1 de 9 registros · 0 archivados | Jorge Alberto Mendoza Salas"
+  },
+  {
+    "id": "08",
+    "c": "Pulido · Concordancia del contador de archivados",
+    "r": "CORRECTA",
+    "d": "8 de 9 registros · 1 archivado || 7 de 9 registros · 2 archivados"
+  },
+  {
+    "id": "09",
+    "c": "Pulido · Terminología unificada",
+    "r": "UNIFICADA EN \"REACTIVAR\"",
+    "d": "listado: [\"Ver\",\"Editar\",\"Reactivar\"] | ficha: [\"← Volver al listado\",\"Reactivar\",\"Editar datos\",\"Nuevo permiso\",\"Nuevo aumento\",\"Eliminar\"]"
+  },
+  {
+    "id": "10",
+    "c": "Pulido · Limpieza de claves anteriores tras migrar",
+    "r": "SOLO QUEDA LA CLAVE ACTUAL",
+    "d": "claves: [\"rh-uveg:employees:v3\"] | migró desde: v2 (la más reciente) ✓"
+  },
+  {
+    "id": "11",
+    "c": "Regresión · Bitácora de la iteración 2",
+    "r": "INTACTA",
+    "d": "[\"Permisos (1)\",\"Aumentos (1)\",\"Bitácora (3)\"]"
+  },
+  {
+    "id": "12",
+    "c": "Regresión · Umbral de la iteración 1",
+    "r": "INTACTO",
+    "d": "Confirmar aumento superior al umbral | ✕ |  | El incremento de $24,500.00 a $60,000.00 representa un +144.90%, por encima del 20 % permitido sin confi"
+  }
+]
