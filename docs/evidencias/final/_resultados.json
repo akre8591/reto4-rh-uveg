@@ -1,0 +1,99 @@
+[
+  {
+    "id": "01",
+    "c": "Panel general",
+    "r": "Capturado"
+  },
+  {
+    "id": "02",
+    "c": "Listado con los siete controles de consulta",
+    "r": "Capturado"
+  },
+  {
+    "id": "03",
+    "c": "Expediente del colaborador",
+    "r": "Capturado"
+  },
+  {
+    "id": "04",
+    "c": "Historial de aumentos",
+    "r": "Capturado"
+  },
+  {
+    "id": "05",
+    "c": "Formulario de registro",
+    "r": "Capturado"
+  },
+  {
+    "id": "06",
+    "c": "R1 · Campos obligatorios",
+    "r": "RECHAZADO",
+    "d": "9 mensajes"
+  },
+  {
+    "id": "07",
+    "c": "R3+R2 · Duplicados y fecha futura",
+    "r": "RECHAZADO",
+    "d": "Ya existe un empleado con ese número. / Ya existe un empleado con ese correo. / La fecha de ingreso no puede ser futura."
+  },
+  {
+    "id": "08",
+    "c": "R2 · Salario negativo, menor de edad y nombre en blanco",
+    "r": "RECHAZADO",
+    "d": "El nombre es obligatorio. / El colaborador debe tener al menos 18 años al ingresar. / El salario debe ser mayor a cero."
+  },
+  {
+    "id": "09",
+    "c": "R5 · Aumento menor al salario vigente",
+    "r": "RECHAZADO",
+    "d": "El nuevo salario debe ser mayor al salario vigente."
+  },
+  {
+    "id": "10",
+    "c": "R5 · Aumento superior al umbral del 20%",
+    "r": "PIDE CONFIRMACIÓN",
+    "d": "Confirmar aumento superior al umbral | ✕ |  | El incremento de $24,500.00 a $55,000.00 representa un +124.49%, por encima del 20 % permitido sin confirmación. Verifica qu"
+  },
+  {
+    "id": "11",
+    "c": "R2 · Permiso traslapado",
+    "r": "RECHAZADO",
+    "d": "Ya existe un permiso registrado en ese periodo."
+  },
+  {
+    "id": "12",
+    "c": "R4 · Confirmación de archivado",
+    "r": "Capturado",
+    "d": "Archivar colaborador | ✕ |  | ¿Deseas archivar a Ana Lucía Ramírez Ponce? Dejará de aparecer en el listado activo, pero su expediente —permisos y aumentos incluidos— se conserva y podrá cons"
+  },
+  {
+    "id": "13",
+    "c": "R4 · Expediente archivado conserva su historial",
+    "r": "CONSERVADO",
+    "d": "[\"Permisos (1)\",\"Aumentos (1)\",\"Bitácora (4)\"]"
+  },
+  {
+    "id": "14",
+    "c": "A1 · Bitácora con el cambio de datos registrado",
+    "r": "REGISTRADO",
+    "d": "4 movimientos"
+  },
+  {
+    "id": "15",
+    "c": "A3 · Filtro por tipo de permiso",
+    "r": "Capturado",
+    "d": "3 de 9 registros · 0 archivados"
+  },
+  {
+    "id": "16",
+    "c": "A3 · Filtros combinados",
+    "r": "Capturado",
+    "d": "1 de 9 registros · 0 archivados"
+  },
+  {
+    "id": "17-18",
+    "c": "M5 · Vista en móvil",
+    "r": "Sin desbordamiento horizontal",
+    "d": "375 px"
+  }
+]
